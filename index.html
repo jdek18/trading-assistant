@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Arkad — Trading Assistant</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230c0e12'/><text x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='Georgia,serif' font-size='18' font-weight='bold' fill='%234f8ef7'>A</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -38,21 +39,21 @@
   #app-screen{display:none;flex:1;flex-direction:column;overflow:hidden;}
 
   /* HEADER */
-  .hdr{border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:50px;flex-shrink:0;gap:10px;}
-  .hdr-left{display:flex;align-items:baseline;gap:12px;flex-shrink:0;}
-  .logo{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);}
-  .logo-sub{font-size:9px;letter-spacing:0.15em;color:var(--text3);text-transform:uppercase;}
-  .hdr-center{display:flex;align-items:center;gap:8px;}
-  .pnl-pill{font-size:13px;font-weight:600;padding:4px 12px;border-radius:2px;border:1px solid var(--border2);}
+  .hdr{border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:70px;flex-shrink:0;gap:10px;}
+  .hdr-left{display:flex;align-items:baseline;gap:14px;flex-shrink:0;}
+  .logo{font-family:'DM Serif Display',serif;font-size:32px;color:var(--text);}
+  .logo-sub{font-size:11px;letter-spacing:0.15em;color:var(--text3);text-transform:uppercase;}
+  .hdr-center{display:flex;align-items:center;gap:10px;}
+  .pnl-pill{font-size:15px;font-weight:600;padding:6px 16px;border-radius:2px;border:1px solid var(--border2);}
   .pnl-pos{color:var(--green);border-color:rgba(58,173,122,0.3);background:rgba(58,173,122,0.08);}
   .pnl-neg{color:var(--red);border-color:rgba(208,90,90,0.3);background:rgba(208,90,90,0.08);}
   .pnl-zero{color:var(--text3);}
-  .mood-pill{font-size:11px;color:var(--text3);padding:4px 10px;border:1px solid var(--border2);border-radius:2px;display:none;}
-  .hdr-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-  .status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:breathe 2s ease-in-out infinite;}
+  .mood-pill{font-size:12px;color:var(--text3);padding:6px 12px;border:1px solid var(--border2);border-radius:2px;display:none;}
+  .hdr-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:breathe 2s ease-in-out infinite;}
   @keyframes breathe{0%,100%{opacity:1}50%{opacity:0.4}}
-  .ping-timer{font-size:10px;color:var(--text3);border:1px solid var(--border2);padding:3px 10px;border-radius:2px;}
-  .hbtn{background:none;border:1px solid var(--border2);color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.08em;padding:4px 10px;text-transform:uppercase;transition:all 0.15s;border-radius:2px;white-space:nowrap;}
+  .ping-timer{font-size:11px;color:var(--text3);border:1px solid var(--border2);padding:5px 12px;border-radius:2px;}
+  .hbtn{background:none;border:1px solid var(--border2);color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.08em;padding:6px 14px;text-transform:uppercase;transition:all 0.15s;border-radius:2px;white-space:nowrap;}
   .hbtn:hover{border-color:var(--accent);color:var(--accent);}
   .badge{background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:8px;padding:1px 5px;margin-left:3px;}
 
@@ -132,16 +133,6 @@
   .linp:focus{border-color:var(--accent);}
   .log-submit-btn{background:var(--accent);border:none;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.08em;padding:9px;text-transform:uppercase;transition:background 0.15s;width:100%;border-radius:2px;}
   .log-submit-btn:hover{background:var(--accent2);}
-
-  /* LOOKUP */
-  .lookup-row{display:flex;gap:8px;}
-  .lookup-inp{flex:1;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:9px 12px;outline:none;border-radius:2px;text-transform:uppercase;letter-spacing:0.05em;transition:border-color 0.15s;}
-  .lookup-inp:focus{border-color:var(--accent);}
-  .lookup-inp::placeholder{color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;}
-  .lookup-go{background:var(--accent);border:none;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;padding:0 14px;border-radius:2px;text-transform:uppercase;transition:background 0.15s;}
-  .lookup-go:hover{background:var(--accent2);}
-  .lookup-out{background:var(--bg3);border:1px solid var(--border);border-radius:2px;padding:12px;font-size:12px;line-height:1.8;color:var(--text2);display:none;white-space:pre-wrap;}
-  .lookup-loading{color:var(--text3);font-size:12px;text-align:center;padding:16px;display:none;}
 
   /* SETTINGS */
   .settings-section{font-size:10px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);padding-bottom:6px;border-bottom:1px solid var(--border);margin-top:4px;}
@@ -270,7 +261,6 @@
       <div class="ptabs">
         <button class="ptab active" onclick="switchTab('checklist',this)">Check</button>
         <button class="ptab" onclick="switchTab('log',this)">Log<span class="badge" id="trade-badge" style="display:none">0</span></button>
-        <button class="ptab" onclick="switchTab('lookup',this)">Lookup</button>
         <button class="ptab" onclick="switchTab('settings',this)">Settings</button>
         <button class="ptab" onclick="switchTab('patterns',this)">Patterns</button>
       </div>
@@ -320,20 +310,6 @@
           </select>
           <input class="linp" id="log-notes" placeholder="Notes (optional)">
           <button class="log-submit-btn" onclick="addTrade()">+ Log Trade</button>
-        </div>
-      </div>
-
-      <!-- LOOKUP -->
-      <div class="pcontent" id="tab-lookup">
-        <div class="panel-pad">
-          <div class="panel-title">Ticker Lookup</div>
-          <div class="panel-desc">Enter a ticker for context, recent news, and whether it fits your setup criteria.</div>
-          <div class="lookup-row">
-            <input class="lookup-inp" id="lookup-ticker" placeholder="Ticker..." maxlength="6" autocomplete="off">
-            <button class="lookup-go" onclick="doLookup()">Go</button>
-          </div>
-          <div class="lookup-loading" id="lookup-loading">Researching...</div>
-          <div class="lookup-out" id="lookup-out"></div>
         </div>
       </div>
 
@@ -447,46 +423,83 @@ let cfg={interval:30,start:'08:00',end:'16:00',size:10000,risk:1,
 function buildPrompt(){
   const td=cfg.temp<=2?'supportive and encouraging, but always honest':
     cfg.temp===3?'direct and balanced — push back when needed, acknowledge good work clearly':
-    cfg.temp===4?'assertive and challenging — push back hard on any rule violations, be very direct':
-    'ruthless — call out every single deviation immediately, no softening whatsoever, make him defend every trade decision';
-  const ld=cfg.length<=2?'Keep responses very concise — 1-3 sentences maximum unless situation is complex.':
-    cfg.length===3?'Give focused, clear responses — typically 3-6 sentences. Expand when the situation genuinely warrants more depth.':
-    'Be conversational and thorough — fully engage with what he shares, ask follow-up questions, provide context and reasoning. Think of this as a real back-and-forth conversation.';
-  return `You are ${userName}'s trading partner. You trade alongside him every session. You are NOT a coach, therapist, or assistant — you are a peer with your own strong opinions who holds him accountable.
+    cfg.temp===4?'assertive and challenging — push back hard on rule violations, be very direct':
+    'ruthless — call out every deviation immediately, no softening, make him defend every decision';
+  const ld=cfg.length<=2?'Keep responses concise — 1-3 sentences unless the situation is genuinely complex.':
+    cfg.length===3?'Give focused, clear responses — typically 3-6 sentences. Expand when the situation warrants it.':
+    'Be conversational and thorough — fully engage, ask follow-up questions, provide context. This is a real back-and-forth.';
+  return `You are ${userName}'s trading partner. You trade the RealDayTrading (RDT) method alongside him. You know this system deeply — not as a rulebook to recite, but as a framework you both live by. You talk like a real person, not a compliance bot.
 
-TEMPERAMENT: ${td}
-RESPONSE LENGTH: ${ld}
+PERSONALITY: ${td}
+RESPONSE STYLE: ${ld}
 
-${userName}'S ENTRY CRITERIA (ALL four must be met — zero exceptions):
-1. ${cfg.c1}
-2. ${cfg.c2}
-3. ${cfg.c3}
-4. ${cfg.c4}
+═══════════════════════════════════════
+THE RDT METHOD — YOUR SHARED FRAMEWORK
+═══════════════════════════════════════
 
-RISK PARAMETERS: Position size ~$${cfg.size.toLocaleString()} | Risk per trade ~${cfg.risk}% (~$${Math.round(cfg.size*cfg.risk/100)} stop)
+CORE PHILOSOPHY:
+The edge in this method comes from identifying institutional activity. Retail traders don't move markets — institutions do. Relative Strength and Weakness vs SPY is not a technical indicator — it's a signal that large money is actively accumulating or distributing a stock independently of the broader market. Your job is to identify where institutions are deploying capital and ride their coattails. You confirm, you never anticipate. Institutions get the first part of the move. You wait for confirmation and take the middle.
 
-${userName}'S KNOWN BEHAVIORAL WEAK SPOTS — watch for these and call them out proactively:
-- Exits trades early because anxiety overrides his predefined stop — his single biggest issue
-- Takes trades during boredom or emotional states that don't meet all criteria
-- Gets overconfident on winning days and starts bending rules
-- Has held trades overnight against his rules (even when it worked out — outcome ≠ process)
-- Skips pre-market routine
+RELATIVE STRENGTH/WEAKNESS — THE REAL DEFINITION:
+True RS/RW is NOT RSI. It's not simple correlation. A stock has genuine RS when it moves independently of SPY, adjusted for the stock's own ATR and volume. If SPY drops and a stock holds flat or goes up — that's RS. If SPY drops and a stock drops less than expected given its ATR — that's RS. A stock that goes up 1% when SPY goes up 1% may have zero RS if that's just what that stock normally does. The calculation needs to account for ATR of both the stock and SPY, and volume. Visually: map SPY over the stock's chart and watch how the stock behaves on every SPY move. Stocks with true RS barely flinch when SPY drops and explode when SPY bounces. That's institutional buying that cannot be hidden.
 
-PSYCHOLOGICAL CONTEXT:
-- Self-worth is tied to trading outcomes — redirect to process identity whenever possible
-- Stock selection is excellent — the gap between potential and actual results is almost entirely execution
-- January was his best month — his execution ceiling at current size. Scaling runs through consistent execution, not better setups
-- Early account blowups were oversized/undisciplined trading, not edge failure — important for confidence
+MARKET FIRST — ALWAYS:
+Before any individual stock matters, SPY sets the context. This is non-negotiable in the RDT method:
+- Market bullish (uptrending, above key levels) → RS longs only
+- Market bearish (downtrending, breaking support) → RW shorts only  
+- Market choppy/undecided → reduced size, selective, or sidelines
+Never trade against the market trend. Never go long a stock no matter how strong it looks if the market is in a sustained downtrend. Never short a stock no matter how weak it looks if the market is grinding higher.
 
-HOW YOU BEHAVE:
-- You have opinions and share them unprompted
-- When he violates rules and it works out: "The outcome doesn't change what you did. Still a bad trade."
-- Notice emotional tone in how he writes. If he sounds anxious, overconfident, or reckless — name it immediately
-- Grade trades A/B/C: A=all criteria met, stop defined pre-entry, no emotional override; B=valid setup, minor deviation; C=any rule violation, period
-- Outcome never equals process quality. Reference this often.
-- Track everything he tells you during the session and reference it in check-ins
+DAILY CHART IS THE FOUNDATION:
+Every trade needs daily chart support. You want:
+- Stock above major SMAs (50, 100, 200) for longs; below for shorts
+- Heikin Ashi continuation candles — flat-bottomed green candles for longs (at least 2 in a row), flat-topped red for shorts
+- No major resistance sitting directly overhead for longs, no major support directly below for shorts
+- Clear directional trend, not parabolic or extended
+- Good volume on the daily — signs of institutional accumulation
+A stock with strong intraday RS but a weak or extended daily chart is a lower probability trade. The daily chart tells you where the big money has been. The intraday RS tells you where it's going right now.
+
+${userName}'S FOUR ENTRY CRITERIA (all must be met):
+1. ${cfg.c1} — confirms institutional participation, not just retail noise
+2. ${cfg.c2} — confirms the daily chart trend is being honored, stock in price discovery
+3. ${cfg.c3} — the core edge, stock moving independently of the broader market
+4. ${cfg.c4} — avoid the noise of the open, wait for the real trend to establish itself
+
+RISK PARAMETERS: ~$${cfg.size.toLocaleString()} position size | ~${cfg.risk}% risk per trade (~$${Math.round(cfg.size*cfg.risk/100)} stop)
+
+CONFIRMATION vs ANTICIPATION:
+One of the most important principles in this method. You do not predict. You do not anticipate. You wait for the move to establish itself and then confirm before entry. Chasing breakouts is a losing strategy — the stock has already made the easy move and you're buying at the point of maximum risk. The right entry is after a pullback into support where the RS/RW is still intact. Set alerts, wait for dips, buy when the stock reclaims strength. This patience separates consistent traders from the ones who constantly feel like they're entering at the wrong time.
+
+WHAT KILLS TRADERS IN THIS METHOD (watch for these in ${userName}):
+- Trading in the first 30 minutes out of FOMO — the open is noise, not signal
+- Chasing breakouts instead of waiting for confirmation after a dip
+- Counter-trend trading — thinking you know better than the market
+- Exiting winners too early (anxiety overriding the process) while holding losers too long
+- Overconfidence after a winning streak → oversized positions or bending criteria
+- Holding overnight without a plan or against the rules
+- Taking trades out of boredom when no valid setup exists
+- Self-worth tied to P&L rather than process quality — outcome is not process
+
+PROCESS GRADING (use when logging trades or debriefing):
+A — All four criteria met, stop defined pre-entry, no emotional override, traded the plan
+B — Valid setup, minor deviation (slightly loose stop, hesitated but didn't break core rules)
+C — Any rule violation: criteria not fully met, no stop defined, moved stop, exited early due to anxiety, held overnight against rules, oversized on overconfidence, boredom trade
+Outcome never changes the grade. A C-grade trade that makes money is still a C.
+
+${userName}'S PROFILE:
+- Genuinely strong stock selection — his edge in identifying setups is real
+- His gap is execution and discipline, not setup quality
+- Key behavioral patterns: exits early when anxious, takes trades when bored or overconfident, gets loose on winning days
+- January was his best month — that's his execution ceiling at current size. Scaling runs through consistent execution first
+- Has been through account blowups from oversized undisciplined trading — that was structural, not edge failure
+- Working toward $5K/month full-time trading income
+
+HOW YOU ACTUALLY TALK:
+You're a real trading partner who has studied the same system, not a rule-enforcement bot. Most of the time you're just talking — about the market, what you're seeing, how the session is going. You bring up rules or patterns only when genuinely relevant. You have your own opinions and share them. You notice emotional tone in how ${userName} writes and address it naturally when something's off. You remember what he's told you throughout the session and weave it in organically. You push back when you disagree, like a peer would. You ask one sharp question at a time rather than firing a list.
+
+THE GOAL: Every conversation feels like talking to someone who has read the same Wiki, traded the same method, and is genuinely present in the session with him — not a chatbot running a checklist.
 ${cfg.notes?`\nADDITIONAL CONTEXT: ${cfg.notes}`:''}
-${moodScore?`\nTODAY'S MOOD: ${moodScore}/5 (${moodLabel}) — factor this in appropriately`:''}`;
+${moodScore?`\nTODAY'S MOOD: ${moodScore}/5 (${moodLabel})`:''}`;
 }
 
 function getCtx(){
@@ -715,24 +728,6 @@ function addTrade(){
   sendAuto(`${userName} logged a trade: ${ticker}${details?' | '+details:''} | Grade: ${grade} | ${ctx}${notes?' | Notes: '+notes:''}. Current P&L: $${totalPnl>=0?'+':''}${totalPnl}. Respond as his trading partner.`,false);
 }
 
-// LOOKUP
-async function doLookup(){
-  const t=document.getElementById('lookup-ticker').value.trim().toUpperCase();
-  if(!t)return;
-  document.getElementById('lookup-loading').style.display='block';
-  document.getElementById('lookup-out').style.display='none';
-  const prompt=`${userName} wants a quick lookup on ${t}. Give him: 1) What this company does in one sentence, 2) Any notable recent news or catalysts you're aware of, 3) Whether this type of stock generally fits a relative strength momentum strategy, 4) Any specific red flags or things to watch. Be direct and useful. Flag if you don't have current price data.`;
-  try{
-    const reply=await callAPI([...conversationHistory,{role:'user',content:prompt}]);
-    document.getElementById('lookup-loading').style.display='none';
-    const out=document.getElementById('lookup-out');out.textContent=reply;out.style.display='block';
-    conversationHistory.push({role:'user',content:prompt});conversationHistory.push({role:'assistant',content:reply});
-  }catch(err){
-    document.getElementById('lookup-loading').style.display='none';
-    const out=document.getElementById('lookup-out');out.textContent=`Error: ${err.message}`;out.style.display='block';
-  }
-}
-
 // SETTINGS
 function saveSettings(){
   cfg.interval=parseInt(document.getElementById('s-interval').value)||30;
@@ -819,7 +814,6 @@ function closeOverlay(id){document.getElementById(id).classList.remove('open');}
 
 document.addEventListener('keydown',e=>{
   if(document.activeElement===document.getElementById('msg-input')&&e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}
-  if(document.activeElement===document.getElementById('lookup-ticker')&&e.key==='Enter'){doLookup();}
 });
 </script>
 </body>
