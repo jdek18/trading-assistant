@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arkad — Trading Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0c0e12;--bg2:#111418;--bg3:#161a20;
+    --border:#1e2228;--border2:#262c35;
+    --accent:#4f8ef7;--accent2:#3a6fd4;
+    --text:#e2e6ed;--text2:#7e8a9a;--text3:#3a4250;
+    --green:#3aad7a;--red:#d05a5a;--yellow:#c8a040;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+  /* SETUP */
+  #setup-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;gap:24px;overflow-y:auto;}
+  .setup-title{font-family:'DM Serif Display',serif;font-size:52px;color:var(--text);line-height:1;}
+  .setup-subtitle{font-size:11px;letter-spacing:0.2em;color:var(--text3);text-transform:uppercase;font-weight:500;}
+  .setup-card{background:var(--bg2);border:1px solid var(--border);padding:28px;width:100%;max-width:480px;display:flex;flex-direction:column;gap:16px;}
+  .lbl{font-size:10px;letter-spacing:0.15em;color:var(--text3);text-transform:uppercase;font-weight:600;margin-bottom:4px;}
+  .inp{background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 14px;width:100%;outline:none;transition:border-color 0.15s;border-radius:2px;}
+  .inp:focus{border-color:var(--accent);}
+  .inp::placeholder{color:var(--text3);}
+  .key-wrap{position:relative;}
+  .key-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:10px;font-family:'DM Sans',sans-serif;font-weight:600;}
+  .key-toggle:hover{color:var(--text2);}
+  .primary-btn{background:var(--accent);border:none;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.08em;padding:12px;text-transform:uppercase;transition:background 0.15s;width:100%;border-radius:2px;}
+  .primary-btn:hover:not(:disabled){background:var(--accent2);}
+  .primary-btn:disabled{background:var(--border2);color:var(--text3);cursor:not-allowed;}
+  .error-box{background:rgba(208,90,90,0.1);border:1px solid var(--red);color:var(--red);font-size:12px;padding:10px 14px;border-radius:2px;display:none;line-height:1.6;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+  /* APP */
+  #app-screen{display:none;flex:1;flex-direction:column;overflow:hidden;}
+
+  /* HEADER */
+  .hdr{border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:50px;flex-shrink:0;gap:10px;}
+  .hdr-left{display:flex;align-items:baseline;gap:12px;flex-shrink:0;}
+  .logo{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);}
+  .logo-sub{font-size:9px;letter-spacing:0.15em;color:var(--text3);text-transform:uppercase;}
+  .hdr-center{display:flex;align-items:center;gap:8px;}
+  .pnl-pill{font-size:13px;font-weight:600;padding:4px 12px;border-radius:2px;border:1px solid var(--border2);}
+  .pnl-pos{color:var(--green);border-color:rgba(58,173,122,0.3);background:rgba(58,173,122,0.08);}
+  .pnl-neg{color:var(--red);border-color:rgba(208,90,90,0.3);background:rgba(208,90,90,0.08);}
+  .pnl-zero{color:var(--text3);}
+  .mood-pill{font-size:11px;color:var(--text3);padding:4px 10px;border:1px solid var(--border2);border-radius:2px;display:none;}
+  .hdr-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+  .status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:breathe 2s ease-in-out infinite;}
+  @keyframes breathe{0%,100%{opacity:1}50%{opacity:0.4}}
+  .ping-timer{font-size:10px;color:var(--text3);border:1px solid var(--border2);padding:3px 10px;border-radius:2px;}
+  .hbtn{background:none;border:1px solid var(--border2);color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.08em;padding:4px 10px;text-transform:uppercase;transition:all 0.15s;border-radius:2px;white-space:nowrap;}
+  .hbtn:hover{border-color:var(--accent);color:var(--accent);}
+  .badge{background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:8px;padding:1px 5px;margin-left:3px;}
+
+  /* TICKER */
+  .ticker{border-bottom:1px solid var(--border);padding:6px 16px;display:flex;gap:24px;font-size:9px;letter-spacing:0.08em;color:var(--text3);overflow:hidden;flex-shrink:0;font-weight:500;text-transform:uppercase;}
+  .ta{color:var(--accent);}.tg{color:var(--green);}
+
+  /* LAYOUT */
+  .app-body{flex:1;display:flex;overflow:hidden;}
+  .chat-col{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+  .chat-area{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:2px;}
+  .chat-area::-webkit-scrollbar{width:3px;}
+  .chat-area::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+  .msg{padding:12px 16px;font-size:14px;line-height:1.75;border-radius:2px;animation:fi 0.2s ease;}
+  @keyframes fi{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+  .msg-user{background:var(--bg2);border-left:3px solid var(--accent);color:var(--text);}
+  .msg-partner{background:transparent;border-left:3px solid var(--border2);color:#bcc4d0;}
+  .msg-ping{border-left-color:var(--green)!important;background:#0c1410!important;}
+  .msg-system{border-left:2px solid var(--border);color:var(--text3);font-size:11px;background:transparent;padding:6px 16px;}
+  .msg-lbl{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;font-weight:600;margin-bottom:5px;}
+  .lbl-user{color:var(--accent);}.lbl-partner{color:var(--text3);}.lbl-ping{color:var(--green)!important;}
+  .typing{padding:12px 16px;border-left:3px solid var(--border2);display:none;margin:0 20px;border-radius:2px;}
+  .dots{display:flex;gap:5px;align-items:center;}
+  .dots span{width:5px;height:5px;background:var(--accent);border-radius:50%;animation:dp 1.2s infinite;}
+  .dots span:nth-child(2){animation-delay:0.2s}.dots span:nth-child(3){animation-delay:0.4s}
+  @keyframes dp{0%,80%,100%{opacity:0.2;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}
+  .input-row{border-top:1px solid var(--border);padding:12px 20px;display:flex;gap:10px;align-items:flex-end;background:var(--bg2);flex-shrink:0;}
+  .input-wrap{flex:1;border:1px solid var(--border2);padding:10px 14px;transition:border-color 0.15s;border-radius:2px;background:var(--bg3);}
+  .input-wrap:focus-within{border-color:var(--accent);}
+  #msg-input{background:transparent;border:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;resize:none;width:100%;line-height:1.5;max-height:100px;}
+  #msg-input::placeholder{color:var(--text3);}
+  .send-btn{background:var(--accent);border:none;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.08em;padding:10px 18px;transition:background 0.15s;height:42px;border-radius:2px;text-transform:uppercase;}
+  .send-btn:hover:not(:disabled){background:var(--accent2);}
+  .send-btn:disabled{background:var(--border2);color:var(--text3);cursor:not-allowed;}
+
+  /* RIGHT PANEL */
+  .rpanel{width:300px;border-left:1px solid var(--border);display:flex;flex-direction:column;background:var(--bg2);flex-shrink:0;overflow:hidden;}
+  .ptabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+  .ptab{flex:1;padding:9px 4px;font-size:9px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);cursor:pointer;text-align:center;border:none;background:none;font-family:'DM Sans',sans-serif;transition:all 0.15s;border-bottom:2px solid transparent;}
+  .ptab:hover{color:var(--text2);}
+  .ptab.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .pcontent{flex:1;overflow-y:auto;display:none;flex-direction:column;}
+  .pcontent.active{display:flex;}
+  .pcontent::-webkit-scrollbar{width:3px;}
+  .pcontent::-webkit-scrollbar-thumb{background:var(--border2);}
+  .panel-pad{padding:16px;display:flex;flex-direction:column;gap:12px;}
+  .panel-title{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);}
+  .panel-desc{font-size:12px;color:var(--text3);line-height:1.6;}
+
+  /* CHECKLIST */
+  .check-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--border2);border-radius:2px;cursor:pointer;transition:all 0.15s;background:var(--bg3);}
+  .check-item:hover{border-color:var(--accent);}
+  .check-item.on{border-color:var(--green);background:rgba(58,173,122,0.07);}
+  .cbox{width:18px;height:18px;border:2px solid var(--border2);border-radius:2px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+  .check-item.on .cbox{background:var(--green);border-color:var(--green);}
+  .ctick{color:#fff;font-size:11px;display:none;}
+  .check-item.on .ctick{display:block;}
+  .clabel{font-size:12px;color:var(--text2);line-height:1.4;}
+  .check-item.on .clabel{color:var(--text);}
+  .cl-result{padding:10px 12px;border-radius:2px;font-size:12px;line-height:1.6;display:none;margin-top:-4px;}
+  .cl-pass{background:rgba(58,173,122,0.1);border:1px solid var(--green);color:var(--green);}
+  .cl-fail{background:rgba(208,90,90,0.1);border:1px solid var(--red);color:#e88;}
+
+  /* TRADE LOG */
+  .log-pnl-row{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;}
+  .pnl-input{flex:1;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:7px 10px;outline:none;border-radius:2px;transition:border-color 0.15s;}
+  .pnl-input:focus{border-color:var(--accent);}
+  .pnl-add{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;padding:7px 12px;text-transform:uppercase;letter-spacing:0.08em;transition:all 0.15s;border-radius:2px;}
+  .pnl-add:hover{border-color:var(--accent);color:var(--accent);}
+  .log-entries{flex:1;padding:10px;display:flex;flex-direction:column;gap:7px;min-height:0;overflow-y:auto;}
+  .log-entry{background:var(--bg3);border:1px solid var(--border);padding:9px 11px;font-size:12px;border-radius:2px;}
+  .log-ticker{color:var(--text);font-weight:600;}
+  .log-grade{font-size:11px;margin-top:3px;font-weight:500;}
+  .ga{color:var(--green);}.gb{color:var(--yellow);}.gc{color:var(--red);}
+  .log-form{padding:10px 12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
+  .linp{background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 9px;outline:none;width:100%;border-radius:2px;transition:border-color 0.15s;}
+  .linp:focus{border-color:var(--accent);}
+  .log-submit-btn{background:var(--accent);border:none;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.08em;padding:9px;text-transform:uppercase;transition:background 0.15s;width:100%;border-radius:2px;}
+  .log-submit-btn:hover{background:var(--accent2);}
+
+  /* LOOKUP */
+  .lookup-row{display:flex;gap:8px;}
+  .lookup-inp{flex:1;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:9px 12px;outline:none;border-radius:2px;text-transform:uppercase;letter-spacing:0.05em;transition:border-color 0.15s;}
+  .lookup-inp:focus{border-color:var(--accent);}
+  .lookup-inp::placeholder{color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;}
+  .lookup-go{background:var(--accent);border:none;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;padding:0 14px;border-radius:2px;text-transform:uppercase;transition:background 0.15s;}
+  .lookup-go:hover{background:var(--accent2);}
+  .lookup-out{background:var(--bg3);border:1px solid var(--border);border-radius:2px;padding:12px;font-size:12px;line-height:1.8;color:var(--text2);display:none;white-space:pre-wrap;}
+  .lookup-loading{color:var(--text3);font-size:12px;text-align:center;padding:16px;display:none;}
+
+  /* SETTINGS */
+  .settings-section{font-size:10px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);padding-bottom:6px;border-bottom:1px solid var(--border);margin-top:4px;}
+  .srow{display:flex;flex-direction:column;gap:4px;}
+  .slbl{font-size:11px;color:var(--text2);font-weight:500;}
+  .sinp{background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 10px;outline:none;width:100%;border-radius:2px;transition:border-color 0.15s;}
+  .sinp:focus{border-color:var(--accent);}
+  .starea{background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;padding:8px 10px;outline:none;width:100%;border-radius:2px;resize:vertical;line-height:1.6;min-height:70px;transition:border-color 0.15s;}
+  .starea:focus{border-color:var(--accent);}
+  .range-wrap{display:flex;flex-direction:column;gap:5px;}
+  .range-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);}
+  input[type=range]{width:100%;accent-color:var(--accent);}
+  .settings-save{background:var(--accent);border:none;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.08em;padding:11px;text-transform:uppercase;transition:background 0.15s;width:100%;border-radius:2px;}
+  .settings-save:hover{background:var(--accent2);}
+  .s-confirm{font-size:11px;color:var(--green);text-align:center;display:none;}
+
+  /* PATTERNS */
+  .drop-zone{background:var(--bg3);border:2px dashed var(--border2);border-radius:4px;padding:24px;text-align:center;color:var(--text3);font-size:12px;line-height:1.8;cursor:pointer;transition:border-color 0.15s;}
+  .drop-zone:hover{border-color:var(--accent);}
+  .pattern-out{font-size:12px;color:var(--text2);line-height:1.8;white-space:pre-wrap;display:none;}
+  .pattern-btn{background:var(--accent);border:none;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:11px;text-transform:uppercase;transition:background 0.15s;width:100%;border-radius:2px;display:none;}
+  .pattern-btn:hover{background:var(--accent2);}
+
+  /* MODALS */
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;align-items:center;justify-content:center;}
+  .overlay.open{display:flex;}
+  .modal{background:var(--bg2);border:1px solid var(--border2);padding:32px;width:600px;max-width:92vw;max-height:82vh;overflow-y:auto;display:flex;flex-direction:column;gap:18px;border-radius:2px;}
+  .modal-title{font-family:'DM Serif Display',serif;font-size:28px;color:var(--text);}
+  .modal-sec{font-size:10px;letter-spacing:0.15em;color:var(--text3);text-transform:uppercase;font-weight:600;margin-bottom:6px;}
+  .modal-txt{font-size:13px;color:var(--text2);line-height:1.8;white-space:pre-wrap;}
+  .modal-actions{display:flex;gap:10px;margin-top:4px;}
+  .mbtn{background:var(--accent);border:none;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:10px 20px;transition:background 0.15s;border-radius:2px;text-transform:uppercase;}
+  .mbtn:hover{background:var(--accent2);}
+  .mbtn-sec{background:none;border:1px solid var(--border2);color:var(--text3);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;padding:10px 20px;transition:all 0.15s;border-radius:2px;text-transform:uppercase;}
+  .mbtn-sec:hover{border-color:var(--text2);color:var(--text2);}
+  .mood-opts{display:flex;gap:8px;}
+  .mood-opt{flex:1;background:var(--bg3);border:2px solid var(--border2);border-radius:4px;padding:12px 6px;text-align:center;cursor:pointer;transition:all 0.15s;font-size:20px;}
+  .mood-opt:hover{border-color:var(--accent);}
+  .mood-opt.sel{border-color:var(--accent);background:rgba(79,142,247,0.1);}
+  .mood-opt span{display:block;font-size:9px;color:var(--text3);margin-top:4px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;}
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div id="setup-screen">
+  <div style="text-align:center">
+    <div class="setup-title">Arkad</div>
+    <div class="setup-subtitle" style="margin-top:8px">Your Trading Partner</div>
+  </div>
+  <div class="setup-card">
+    <div id="setup-error" class="error-box"></div>
+    <div>
+      <div class="lbl">Anthropic API Key</div>
+      <div class="key-wrap">
+        <input class="inp" type="password" id="api-key-input" placeholder="sk-ant-api03-..." style="padding-right:60px" autocomplete="off">
+        <button class="key-toggle" type="button" onclick="toggleKey()">SHOW</button>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:5px">Get yours at console.anthropic.com → API Keys</div>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:8px;cursor:pointer">
+        <input type="checkbox" id="remember-key" style="accent-color:var(--accent);width:14px;height:14px;">
+        <span style="font-size:11px;color:var(--text2)">Remember my key on this device</span>
+      </label>
+    </div>
+    <div class="grid2">
+      <div><div class="lbl">Your Name</div><input class="inp" type="text" id="name-input" value="Jack"></div>
+      <div><div class="lbl">Check-in Interval</div>
+        <select class="inp" id="ping-interval">
+          <option value="15">Every 15 min</option>
+          <option value="30" selected>Every 30 min</option>
+          <option value="45">Every 45 min</option>
+          <option value="60">Every hour</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid2">
+      <div><div class="lbl">Session Start (ET)</div><input class="inp" type="time" id="start-time" value="08:00"></div>
+      <div><div class="lbl">Session End (ET)</div><input class="inp" type="time" id="end-time" value="16:00"></div>
+    </div>
+    <button class="primary-btn" id="start-btn" onclick="startSession()">Open Session</button>
+  </div>
+  <div style="font-size:11px;color:var(--text3);text-align:center;max-width:400px;line-height:1.8">Your strategy, risk rules, and behavioral patterns are pre-loaded.<br>Your partner knows your edge — and your weak spots.</div>
+</div>
+
+<!-- APP -->
+<div id="app-screen">
+  <div class="hdr">
+    <div class="hdr-left">
+      <div class="logo">Arkad</div>
+      <div class="logo-sub">Trading Partner</div>
+    </div>
+    <div class="hdr-center">
+      <div class="pnl-pill pnl-zero" id="pnl-display">P&amp;L: $0</div>
+      <div class="mood-pill" id="mood-display"></div>
+    </div>
+    <div class="hdr-right">
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="status-dot"></div>
+        <div class="ping-timer" id="ping-timer">--:--</div>
+      </div>
+      <button class="hbtn" onclick="openMood()">Mood</button>
+      <button class="hbtn" onclick="triggerEOD()">EOD Save</button>
+    </div>
+  </div>
+  <div class="ticker">
+    <span>Rel Vol ≥1.5x</span><span class="ta">Above PDH</span><span>RS vs SPY</span>
+    <span class="ta">Skip 9:30–10:00 ET</span><span>Risk 1%</span><span class="ta">$10K Size</span>
+    <span class="tg">Process = Edge</span><span>Hold Your Stops</span>
+  </div>
+  <div class="app-body">
+    <!-- CHAT -->
+    <div class="chat-col">
+      <div class="chat-area" id="chat-area"></div>
+      <div class="typing" id="typing">
+        <div style="font-size:9px;letter-spacing:0.15em;color:var(--text3);margin-bottom:5px;text-transform:uppercase">Partner</div>
+        <div class="dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="input-row">
+        <div class="input-wrap"><textarea id="msg-input" rows="2" placeholder="Talk to your partner... (Enter to send)"></textarea></div>
+        <button class="send-btn" id="send-btn" onclick="sendMsg()">Send</button>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="rpanel">
+      <div class="ptabs">
+        <button class="ptab active" onclick="switchTab('checklist',this)">Check</button>
+        <button class="ptab" onclick="switchTab('log',this)">Log<span class="badge" id="trade-badge" style="display:none">0</span></button>
+        <button class="ptab" onclick="switchTab('lookup',this)">Lookup</button>
+        <button class="ptab" onclick="switchTab('settings',this)">Settings</button>
+        <button class="ptab" onclick="switchTab('patterns',this)">Patterns</button>
+      </div>
+
+      <!-- CHECKLIST -->
+      <div class="pcontent active" id="tab-checklist">
+        <div class="panel-pad">
+          <div class="panel-title">Pre-Trade Checklist</div>
+          <div>
+            <div class="lbl" style="margin-bottom:5px">Ticker</div>
+            <input class="inp" id="cl-ticker" placeholder="e.g. NVDA" autocomplete="off" style="font-size:15px;font-weight:600;letter-spacing:0.05em">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px" id="cl-items">
+            <div class="check-item" onclick="toggleCheck(this)" data-k="rvol"><div class="cbox"><span class="ctick">✓</span></div><div class="clabel" id="cll-rvol">Relative volume ≥ 1.5x prior day</div></div>
+            <div class="check-item" onclick="toggleCheck(this)" data-k="pdh"><div class="cbox"><span class="ctick">✓</span></div><div class="clabel" id="cll-pdh">Price above prior day's high (PDH)</div></div>
+            <div class="check-item" onclick="toggleCheck(this)" data-k="rs"><div class="cbox"><span class="ctick">✓</span></div><div class="clabel" id="cll-rs">Relative strength vs SPY</div></div>
+            <div class="check-item" onclick="toggleCheck(this)" data-k="time"><div class="cbox"><span class="ctick">✓</span></div><div class="clabel" id="cll-time">Past 10:00 AM ET (no first 30 min)</div></div>
+          </div>
+          <div>
+            <div class="lbl" style="margin-bottom:5px">Planned Stop Level</div>
+            <input class="inp" id="cl-stop" placeholder="e.g. $127.50">
+          </div>
+          <div class="cl-result" id="cl-result"></div>
+          <button class="primary-btn" onclick="submitChecklist()">Validate Trade →</button>
+          <button style="background:none;border:1px solid var(--border2);color:var(--text3);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;padding:8px;text-transform:uppercase;transition:all 0.15s;width:100%;border-radius:2px;" onmouseover="this.style.borderColor='var(--text3)'" onmouseout="this.style.borderColor='var(--border2)'" onclick="resetChecklist()">Reset</button>
+        </div>
+      </div>
+
+      <!-- TRADE LOG -->
+      <div class="pcontent" id="tab-log">
+        <div class="log-pnl-row">
+          <input class="pnl-input" type="number" id="pnl-inp" placeholder="Add P&amp;L (e.g. +150)">
+          <button class="pnl-add" onclick="addPnl()">+ Add</button>
+        </div>
+        <div class="log-entries" id="log-entries">
+          <div style="font-size:11px;color:var(--text3);text-align:center;padding:20px;line-height:1.7">No trades yet.<br>Use the form below to log.</div>
+        </div>
+        <div class="log-form">
+          <div class="lbl">Log a Trade</div>
+          <input class="linp" id="log-ticker" placeholder="Ticker (e.g. NVDA)" autocomplete="off">
+          <input class="linp" id="log-details" placeholder="Entry | Exit | P&amp;L">
+          <select class="linp" id="log-grade">
+            <option value="">Process Grade...</option>
+            <option value="A">A — Followed all rules</option>
+            <option value="B">B — Minor deviation</option>
+            <option value="C">C — Rule violation</option>
+          </select>
+          <input class="linp" id="log-notes" placeholder="Notes (optional)">
+          <button class="log-submit-btn" onclick="addTrade()">+ Log Trade</button>
+        </div>
+      </div>
+
+      <!-- LOOKUP -->
+      <div class="pcontent" id="tab-lookup">
+        <div class="panel-pad">
+          <div class="panel-title">Ticker Lookup</div>
+          <div class="panel-desc">Enter a ticker for context, recent news, and whether it fits your setup criteria.</div>
+          <div class="lookup-row">
+            <input class="lookup-inp" id="lookup-ticker" placeholder="Ticker..." maxlength="6" autocomplete="off">
+            <button class="lookup-go" onclick="doLookup()">Go</button>
+          </div>
+          <div class="lookup-loading" id="lookup-loading">Researching...</div>
+          <div class="lookup-out" id="lookup-out"></div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="pcontent" id="tab-settings">
+        <div class="panel-pad">
+          <div class="settings-section">Session</div>
+          <div class="srow"><div class="slbl">Check-in interval (min)</div><input class="sinp" type="number" id="s-interval" value="30" min="5" max="120"></div>
+          <div class="grid2" style="gap:8px">
+            <div class="srow"><div class="slbl">Start (ET)</div><input class="sinp" type="time" id="s-start" value="08:00"></div>
+            <div class="srow"><div class="slbl">End (ET)</div><input class="sinp" type="time" id="s-end" value="16:00"></div>
+          </div>
+          <div class="settings-section">Risk</div>
+          <div class="grid2" style="gap:8px">
+            <div class="srow"><div class="slbl">Position size ($)</div><input class="sinp" type="number" id="s-size" value="10000"></div>
+            <div class="srow"><div class="slbl">Risk per trade (%)</div><input class="sinp" type="number" id="s-risk" value="1" step="0.1"></div>
+          </div>
+          <div class="settings-section">Entry Criteria</div>
+          <div class="srow"><div class="slbl">Criterion 1</div><input class="sinp" id="s-c1" value="Relative volume ≥ 1.5x prior day's volume"></div>
+          <div class="srow"><div class="slbl">Criterion 2</div><input class="sinp" id="s-c2" value="Price above prior day's high (PDH)"></div>
+          <div class="srow"><div class="slbl">Criterion 3</div><input class="sinp" id="s-c3" value="Relative strength vs SPY (long) or weakness (short)"></div>
+          <div class="srow"><div class="slbl">Criterion 4</div><input class="sinp" id="s-c4" value="No trades in first 30 min (9:30–10:00 ET)"></div>
+          <div class="settings-section">Partner Temperament</div>
+          <div class="range-wrap">
+            <input type="range" id="s-temp" min="1" max="5" value="4">
+            <div class="range-labels"><span>Supportive</span><span>Balanced</span><span>Ruthless</span></div>
+          </div>
+          <div class="settings-section">Response Style</div>
+          <div class="range-wrap">
+            <input type="range" id="s-length" min="1" max="5" value="3">
+            <div class="range-labels"><span>Concise</span><span>Balanced</span><span>Conversational</span></div>
+          </div>
+          <div class="settings-section">Extra Context</div>
+          <div class="srow"><div class="slbl">Custom notes for your partner</div><textarea class="starea" id="s-notes" placeholder="Current goals, things to watch, anything else..."></textarea></div>
+          <button class="settings-save" onclick="saveSettings()">Apply Settings</button>
+          <div class="s-confirm" id="s-confirm">Settings applied ✓</div>
+        </div>
+      </div>
+
+      <!-- PATTERNS -->
+      <div class="pcontent" id="tab-patterns">
+        <div class="panel-pad">
+          <div class="panel-title">Pattern Analysis</div>
+          <div class="panel-desc">Upload your EOD session .txt files to get a pattern report across multiple sessions.</div>
+          <div class="drop-zone" onclick="document.getElementById('pf').click()">
+            📁 Click to upload EOD files<br>
+            <span style="font-size:10px">Select one or more .txt session files</span>
+          </div>
+          <input type="file" id="pf" multiple accept=".txt" onchange="loadFiles(event)" style="display:none">
+          <div id="pf-loaded" style="font-size:11px;color:var(--green);display:none"></div>
+          <button class="pattern-btn" id="pattern-btn" onclick="analyzePatterns()">Analyze Patterns</button>
+          <div class="pattern-out" id="pattern-out"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EOD MODAL -->
+<div class="overlay" id="eod-modal">
+  <div class="modal">
+    <div class="modal-title">Session Summary</div>
+    <div id="eod-content"></div>
+    <div class="modal-actions">
+      <button class="mbtn" onclick="downloadEOD()">Download</button>
+      <button class="mbtn-sec" onclick="closeOverlay('eod-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- MOOD MODAL -->
+<div class="overlay" id="mood-modal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title">How are you feeling?</div>
+    <div style="font-size:13px;color:var(--text3);margin-top:-8px">Logged with your session and shared with your partner.</div>
+    <div class="mood-opts">
+      <div class="mood-opt" onclick="pickMood(1,this)">😔<span>Off</span></div>
+      <div class="mood-opt" onclick="pickMood(2,this)">😐<span>Meh</span></div>
+      <div class="mood-opt" onclick="pickMood(3,this)">🙂<span>Good</span></div>
+      <div class="mood-opt" onclick="pickMood(4,this)">😀<span>Sharp</span></div>
+      <div class="mood-opt" onclick="pickMood(5,this)">🔥<span>Locked</span></div>
+    </div>
+    <div class="modal-actions">
+      <button class="mbtn" onclick="confirmMood()">Confirm</button>
+      <button class="mbtn-sec" onclick="closeOverlay('mood-modal');kickoff()">Skip</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let apiKey='',userName='Jack',conversationHistory=[],tradeLog=[],pingIntervalMins=30;
+let sessionStart='08:00',sessionEnd='16:00',pingTimer=null,nextPingTime=null;
+let isLoading=false,eodSummaryText='',totalPnl=0,moodScore=null,moodLabel='';
+let selectedMood=null,patternFiles=[];
+
+// Load saved key on page load
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('arkad_api_key');
+  if (saved) {
+    document.getElementById('api-key-input').value = saved;
+    document.getElementById('remember-key').checked = true;
+  }
+});
+let cfg={interval:30,start:'08:00',end:'16:00',size:10000,risk:1,
+  c1:"Relative volume ≥ 1.5x prior day's volume",
+  c2:"Price above prior day's high (PDH)",
+  c3:"Relative strength vs SPY (long) or weakness (short)",
+  c4:"No trades in first 30 min (9:30–10:00 ET)",
+  temp:4,length:3,notes:''};
+
+function buildPrompt(){
+  const td=cfg.temp<=2?'supportive and encouraging, but always honest':
+    cfg.temp===3?'direct and balanced — push back when needed, acknowledge good work clearly':
+    cfg.temp===4?'assertive and challenging — push back hard on any rule violations, be very direct':
+    'ruthless — call out every single deviation immediately, no softening whatsoever, make him defend every trade decision';
+  const ld=cfg.length<=2?'Keep responses very concise — 1-3 sentences maximum unless situation is complex.':
+    cfg.length===3?'Give focused, clear responses — typically 3-6 sentences. Expand when the situation genuinely warrants more depth.':
+    'Be conversational and thorough — fully engage with what he shares, ask follow-up questions, provide context and reasoning. Think of this as a real back-and-forth conversation.';
+  return `You are ${userName}'s trading partner. You trade alongside him every session. You are NOT a coach, therapist, or assistant — you are a peer with your own strong opinions who holds him accountable.
+
+TEMPERAMENT: ${td}
+RESPONSE LENGTH: ${ld}
+
+${userName}'S ENTRY CRITERIA (ALL four must be met — zero exceptions):
+1. ${cfg.c1}
+2. ${cfg.c2}
+3. ${cfg.c3}
+4. ${cfg.c4}
+
+RISK PARAMETERS: Position size ~$${cfg.size.toLocaleString()} | Risk per trade ~${cfg.risk}% (~$${Math.round(cfg.size*cfg.risk/100)} stop)
+
+${userName}'S KNOWN BEHAVIORAL WEAK SPOTS — watch for these and call them out proactively:
+- Exits trades early because anxiety overrides his predefined stop — his single biggest issue
+- Takes trades during boredom or emotional states that don't meet all criteria
+- Gets overconfident on winning days and starts bending rules
+- Has held trades overnight against his rules (even when it worked out — outcome ≠ process)
+- Skips pre-market routine
+
+PSYCHOLOGICAL CONTEXT:
+- Self-worth is tied to trading outcomes — redirect to process identity whenever possible
+- Stock selection is excellent — the gap between potential and actual results is almost entirely execution
+- January was his best month — his execution ceiling at current size. Scaling runs through consistent execution, not better setups
+- Early account blowups were oversized/undisciplined trading, not edge failure — important for confidence
+
+HOW YOU BEHAVE:
+- You have opinions and share them unprompted
+- When he violates rules and it works out: "The outcome doesn't change what you did. Still a bad trade."
+- Notice emotional tone in how he writes. If he sounds anxious, overconfident, or reckless — name it immediately
+- Grade trades A/B/C: A=all criteria met, stop defined pre-entry, no emotional override; B=valid setup, minor deviation; C=any rule violation, period
+- Outcome never equals process quality. Reference this often.
+- Track everything he tells you during the session and reference it in check-ins
+${cfg.notes?`\nADDITIONAL CONTEXT: ${cfg.notes}`:''}
+${moodScore?`\nTODAY'S MOOD: ${moodScore}/5 (${moodLabel}) — factor this in appropriately`:''}`;
+}
+
+function getCtx(){
+  let p=buildPrompt();
+  if(tradeLog.length>0){
+    p+='\n\nTODAY\'S TRADE LOG:\n'+tradeLog.map(t=>`${t.time} | ${t.ticker}${t.details?' | '+t.details:''} | Grade: ${t.grade}${t.notes?' | '+t.notes:''}`).join('\n');
+    p+=`\nRunning P&L: $${totalPnl>=0?'+':''}${totalPnl}`;
+  }
+  return p;
+}
+
+async function callAPI(messages){
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,system:getCtx(),messages})
+  });
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(`${res.status}: ${e.error?.message||res.statusText}`);}
+  const d=await res.json();
+  return d.content?.find(b=>b.type==='text')?.text||'';
+}
+
+function toggleKey(){const i=document.getElementById('api-key-input');const b=document.querySelector('.key-toggle');i.type=i.type==='password'?'text':'password';b.textContent=i.type==='password'?'SHOW':'HIDE';}
+
+async function startSession(){
+  const key=document.getElementById('api-key-input').value.trim();
+  document.getElementById('setup-error').style.display='none';
+  if(!key){showErr('Enter your Anthropic API key.');return;}
+  if(!key.startsWith('sk-ant-')){showErr('Key should start with sk-ant-. Get it from console.anthropic.com.');return;}
+  apiKey=key;
+  // Save or clear key based on checkbox
+  if (document.getElementById('remember-key').checked) {
+    localStorage.setItem('arkad_api_key', key);
+  } else {
+    localStorage.removeItem('arkad_api_key');
+  }
+  const btn=document.getElementById('start-btn');
+  btn.textContent='Connecting...';btn.disabled=true;
+  try{await callAPI([{role:'user',content:'ping'}]);}
+  catch(err){
+    btn.textContent='Open Session';btn.disabled=false;
+    if(err.message.startsWith('401'))showErr('Key rejected. Make sure billing is active at console.anthropic.com → Billing.');
+    else showErr(`Connection failed: ${err.message}. Open from localhost:8080, not directly.`);
+    return;
+  }
+  userName=document.getElementById('name-input').value.trim()||'Jack';
+  sessionStart=document.getElementById('start-time').value;
+  sessionEnd=document.getElementById('end-time').value;
+  pingIntervalMins=parseInt(document.getElementById('ping-interval').value);
+  cfg.interval=pingIntervalMins;cfg.start=sessionStart;cfg.end=sessionEnd;
+  document.getElementById('s-interval').value=pingIntervalMins;
+  document.getElementById('s-start').value=sessionStart;
+  document.getElementById('s-end').value=sessionEnd;
+  document.getElementById('setup-screen').style.display='none';
+  document.getElementById('app-screen').style.display='flex';
+  openMood();
+  schedulePing();
+  setInterval(updateTimer,10000);
+}
+
+function showErr(m){const e=document.getElementById('setup-error');e.textContent=m;e.style.display='block';}
+
+function openMood(){document.getElementById('mood-modal').classList.add('open');}
+function pickMood(s,el){document.querySelectorAll('.mood-opt').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');selectedMood=s;}
+function confirmMood(){
+  if(selectedMood){
+    moodScore=selectedMood;
+    const lbls=['','Off','Meh','Good','Sharp','Locked 🔥'];
+    const emjs=['','😔','😐','🙂','😀','🔥'];
+    moodLabel=lbls[moodScore];
+    const d=document.getElementById('mood-display');
+    d.textContent=`${emjs[moodScore]} ${moodLabel}`;d.style.display='block';
+  }
+  closeOverlay('mood-modal');kickoff();
+}
+function kickoff(){
+  const now=new Date();
+  const t=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',timeZone:'America/New_York'});
+  const mc=moodScore?` His mood check-in is ${moodScore}/5 — ${moodLabel}.`:'';
+  sendAuto(`It is ${t} ET and ${userName} is opening his trading session.${mc} Greet him as his trading partner. Ask what he's seeing pre-market and what his posture is for today — aggressive, selective, or sidelines. Be direct and genuine.`,true);
+}
+
+function schedulePing(){
+  if(pingTimer)clearTimeout(pingTimer);
+  const ms=pingIntervalMins*60*1000;
+  nextPingTime=new Date(Date.now()+ms);
+  pingTimer=setTimeout(()=>{
+    const now=new Date();
+    const et=new Date(now.toLocaleString('en-US',{timeZone:'America/New_York'}));
+    const [sh,sm]=sessionStart.split(':').map(Number);
+    const [eh,em]=sessionEnd.split(':').map(Number);
+    const etm=et.getHours()*60+et.getMinutes();
+    if(etm>=sh*60+sm&&etm<=eh*60+em){
+      const t=et.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+      const pc=totalPnl!==0?` Running P&L is $${totalPnl>=0?'+':''}${totalPnl}.`:'';
+      sendAuto(`Auto check-in at ${t} ET.${pc} Check in with ${userName} as his trading partner. Ask how the session is going. Reference anything from earlier today if relevant. Share one observation about what you'd be watching at this time of day. If he's been quiet, call it out.`,true);
+    }
+    schedulePing();
+  },ms);
+}
+
+function updateTimer(){
+  if(!nextPingTime)return;
+  const d=Math.max(0,nextPingTime-Date.now());
+  const m=Math.floor(d/60000);
+  const s=Math.floor((d%60000)/1000);
+  document.getElementById('ping-timer').textContent=`${m}:${s.toString().padStart(2,'0')}`;
+}
+
+async function sendAuto(prompt,isPing=false){
+  if(isLoading)return;
+  showDots();
+  try{
+    const msgs=[...conversationHistory,{role:'user',content:prompt}];
+    const reply=await callAPI(msgs);
+    hideDots();
+    conversationHistory.push({role:'user',content:prompt});
+    conversationHistory.push({role:'assistant',content:reply});
+    addMsg('partner',reply,isPing);
+  }catch(err){hideDots();addMsg('system',`Check-in error: ${err.message}`);}
+}
+
+async function sendMsg(){
+  const inp=document.getElementById('msg-input');
+  const txt=inp.value.trim();
+  if(!txt||isLoading)return;
+  inp.value='';inp.style.height='auto';
+  addMsg('user',txt);
+  conversationHistory.push({role:'user',content:txt});
+  isLoading=true;document.getElementById('send-btn').disabled=true;showDots();
+  try{
+    const reply=await callAPI(conversationHistory);
+    hideDots();conversationHistory.push({role:'assistant',content:reply});addMsg('partner',reply);
+  }catch(err){hideDots();addMsg('system',`Error: ${err.message}`);}
+  isLoading=false;document.getElementById('send-btn').disabled=false;
+}
+
+function addMsg(role,content,isPing=false){
+  const area=document.getElementById('chat-area');
+  const div=document.createElement('div');
+  if(role==='system'){div.className='msg msg-system';div.textContent=content;}
+  else{
+    div.className=`msg msg-${role}${isPing?' msg-ping':''}`;
+    const lbl=document.createElement('div');
+    lbl.className=`msg-lbl lbl-${role}${isPing?' lbl-ping':''}`;
+    lbl.textContent=role==='user'?userName.toUpperCase():isPing?'◉ CHECK-IN':'PARTNER';
+    const txt=document.createElement('div');txt.style.whiteSpace='pre-wrap';txt.textContent=content;
+    div.appendChild(lbl);div.appendChild(txt);
+  }
+  area.appendChild(div);area.scrollTop=area.scrollHeight;
+}
+function showDots(){document.getElementById('typing').style.display='block';document.getElementById('chat-area').scrollTop=99999;}
+function hideDots(){document.getElementById('typing').style.display='none';}
+
+function switchTab(name,btn){
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.pcontent').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+// CHECKLIST
+function toggleCheck(el){el.classList.toggle('on');updateClResult();}
+function updateClResult(){
+  const items=[...document.querySelectorAll('#cl-items .check-item')];
+  const all=items.every(i=>i.classList.contains('on'));
+  const res=document.getElementById('cl-result');
+  if(items.some(i=>i.classList.contains('on'))){
+    if(all){res.className='cl-result cl-pass';res.textContent='✓ All criteria met. Define your stop and validate.';res.style.display='block';}
+    else{const miss=items.filter(i=>!i.classList.contains('on')).map(i=>i.querySelector('.clabel').textContent);res.className='cl-result cl-fail';res.textContent=`✗ Missing: ${miss.join('; ')}`;res.style.display='block';}
+  }else{res.style.display='none';}
+}
+function submitChecklist(){
+  const ticker=document.getElementById('cl-ticker').value.trim().toUpperCase();
+  const stop=document.getElementById('cl-stop').value.trim();
+  const items=[...document.querySelectorAll('#cl-items .check-item')];
+  const all=items.every(i=>i.classList.contains('on'));
+  const miss=items.filter(i=>!i.classList.contains('on')).map(i=>i.querySelector('.clabel').textContent);
+  if(!ticker){alert('Enter a ticker first.');return;}
+  const status=all?'VALID — all four criteria confirmed':'INVALID — missing: '+miss.join('; ');
+  const stopTxt=stop?` Stop defined at ${stop}.`:' WARNING: No stop level defined.';
+  const prompt=`${userName} is validating a pre-trade checklist for ${ticker}. Status: ${status}.${stopTxt} Respond as his trading partner. ${all&&stop?'The setup looks valid. Confirm and ask if there is anything else to consider before entry.':!all?'Push back on the missing criteria. Do not approve this trade.':'Acknowledge the valid setup but flag the missing stop — this is non-negotiable.'}`;
+  sendAuto(prompt,false);
+  // Switch to chat col for the response
+  document.getElementById('chat-area').scrollTop=99999;
+}
+function resetChecklist(){
+  document.querySelectorAll('#cl-items .check-item').forEach(i=>i.classList.remove('on'));
+  document.getElementById('cl-ticker').value='';
+  document.getElementById('cl-stop').value='';
+  document.getElementById('cl-result').style.display='none';
+}
+
+// TRADE LOG
+function addPnl(){
+  const v=parseFloat(document.getElementById('pnl-inp').value);
+  if(isNaN(v))return;
+  totalPnl+=v;document.getElementById('pnl-inp').value='';updatePnl();
+}
+function updatePnl(){
+  const d=document.getElementById('pnl-display');
+  d.textContent=`P&L: $${totalPnl>=0?'+':''}${totalPnl.toFixed(0)}`;
+  d.className='pnl-pill '+(totalPnl>0?'pnl-pos':totalPnl<0?'pnl-neg':'pnl-zero');
+}
+function addTrade(){
+  const ticker=document.getElementById('log-ticker').value.trim().toUpperCase();
+  const details=document.getElementById('log-details').value.trim();
+  const grade=document.getElementById('log-grade').value;
+  const notes=document.getElementById('log-notes').value.trim();
+  if(!ticker||!grade){alert('Ticker and grade required.');return;}
+  const trade={ticker,details,grade,notes,time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})};
+  tradeLog.push(trade);
+  // Auto-extract P&L from details if present
+  const pm=details.match(/([+-]?\$?[\d,]+\.?\d*)\s*$/);
+  if(pm){const pv=parseFloat(pm[1].replace(/[$,]/g,''));if(!isNaN(pv)){totalPnl+=pv;updatePnl();}}
+  // Update badge
+  const b=document.getElementById('trade-badge');b.textContent=tradeLog.length;b.style.display='inline-block';
+  // Render entry
+  const entries=document.getElementById('log-entries');
+  if(tradeLog.length===1)entries.innerHTML='';
+  const e=document.createElement('div');e.className='log-entry';
+  e.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><span class="log-ticker">${ticker}</span><span style="font-size:10px;color:var(--text3)">${trade.time}</span></div>${details?`<div style="font-size:11px;color:var(--text2);margin-top:3px">${details}</div>`:''}<div class="log-grade g${grade.toLowerCase()}">Grade: ${grade}</div>${notes?`<div style="font-size:10px;color:var(--text3);margin-top:3px">${notes}</div>`:''}`;
+  entries.appendChild(e);
+  ['log-ticker','log-details','log-grade','log-notes'].forEach(id=>document.getElementById(id).value='');
+  const ctx=grade==='C'?'RULE VIOLATION — push back hard, the outcome is irrelevant':grade==='A'?'clean execution — brief acknowledgment, keep moving':'minor deviation — note it briefly and ask what happened';
+  sendAuto(`${userName} logged a trade: ${ticker}${details?' | '+details:''} | Grade: ${grade} | ${ctx}${notes?' | Notes: '+notes:''}. Current P&L: $${totalPnl>=0?'+':''}${totalPnl}. Respond as his trading partner.`,false);
+}
+
+// LOOKUP
+async function doLookup(){
+  const t=document.getElementById('lookup-ticker').value.trim().toUpperCase();
+  if(!t)return;
+  document.getElementById('lookup-loading').style.display='block';
+  document.getElementById('lookup-out').style.display='none';
+  const prompt=`${userName} wants a quick lookup on ${t}. Give him: 1) What this company does in one sentence, 2) Any notable recent news or catalysts you're aware of, 3) Whether this type of stock generally fits a relative strength momentum strategy, 4) Any specific red flags or things to watch. Be direct and useful. Flag if you don't have current price data.`;
+  try{
+    const reply=await callAPI([...conversationHistory,{role:'user',content:prompt}]);
+    document.getElementById('lookup-loading').style.display='none';
+    const out=document.getElementById('lookup-out');out.textContent=reply;out.style.display='block';
+    conversationHistory.push({role:'user',content:prompt});conversationHistory.push({role:'assistant',content:reply});
+  }catch(err){
+    document.getElementById('lookup-loading').style.display='none';
+    const out=document.getElementById('lookup-out');out.textContent=`Error: ${err.message}`;out.style.display='block';
+  }
+}
+
+// SETTINGS
+function saveSettings(){
+  cfg.interval=parseInt(document.getElementById('s-interval').value)||30;
+  cfg.start=document.getElementById('s-start').value;
+  cfg.end=document.getElementById('s-end').value;
+  cfg.size=parseInt(document.getElementById('s-size').value)||10000;
+  cfg.risk=parseFloat(document.getElementById('s-risk').value)||1;
+  cfg.c1=document.getElementById('s-c1').value;
+  cfg.c2=document.getElementById('s-c2').value;
+  cfg.c3=document.getElementById('s-c3').value;
+  cfg.c4=document.getElementById('s-c4').value;
+  cfg.temp=parseInt(document.getElementById('s-temp').value);
+  cfg.length=parseInt(document.getElementById('s-length').value);
+  cfg.notes=document.getElementById('s-notes').value;
+  pingIntervalMins=cfg.interval;sessionStart=cfg.start;sessionEnd=cfg.end;
+  // Update checklist labels
+  document.getElementById('cll-rvol').textContent=cfg.c1;
+  document.getElementById('cll-pdh').textContent=cfg.c2;
+  document.getElementById('cll-rs').textContent=cfg.c3;
+  document.getElementById('cll-time').textContent=cfg.c4;
+  schedulePing();
+  const c=document.getElementById('s-confirm');c.style.display='block';setTimeout(()=>c.style.display='none',3000);
+}
+
+// PATTERNS
+let pfContents=[];
+function loadFiles(e){
+  const files=e.target.files;if(!files.length)return;
+  pfContents=[];let loaded=0;
+  for(const f of files){
+    const r=new FileReader();
+    r.onload=ev=>{pfContents.push({name:f.name,content:ev.target.result});loaded++;
+      if(loaded===files.length){
+        document.getElementById('pf-loaded').textContent=`${files.length} file${files.length>1?'s':''} loaded`;
+        document.getElementById('pf-loaded').style.display='block';
+        document.getElementById('pattern-btn').style.display='block';
+      }};
+    r.readAsText(f);
+  }
+}
+async function analyzePatterns(){
+  if(!pfContents.length)return;
+  const btn=document.getElementById('pattern-btn');
+  btn.textContent='Analyzing...';btn.disabled=true;
+  const combined=pfContents.map(f=>`=== ${f.name} ===\n${f.content}`).join('\n\n');
+  const prompt=`Analyze these ${pfContents.length} trading session files for ${userName} and identify recurring patterns. Look for: 1) Which days/times have most C-grade trades, 2) Tickers that appear repeatedly, 3) P&L patterns (big wins followed by losses?), 4) Behavioral patterns across multiple sessions, 5) What's improving vs what keeps breaking down. Be direct and specific — this is a diagnostic report, not a pep talk.\n\nSESSION DATA:\n${combined.substring(0,8000)}`;
+  try{
+    const reply=await callAPI([{role:'user',content:prompt}]);
+    const out=document.getElementById('pattern-out');out.textContent=reply;out.style.display='block';
+  }catch(err){
+    const out=document.getElementById('pattern-out');out.textContent=`Error: ${err.message}`;out.style.display='block';
+  }
+  btn.textContent='Analyze Patterns';btn.disabled=false;
+}
+
+// EOD
+async function triggerEOD(){
+  document.getElementById('eod-modal').classList.add('open');
+  document.getElementById('eod-content').innerHTML='<div style="color:var(--text3);font-size:13px;padding:8px 0">Generating your session summary...</div>';
+  const logText=tradeLog.length>0?tradeLog.map(t=>`${t.time} | ${t.ticker}${t.details?' | '+t.details:''} | Grade: ${t.grade}${t.notes?' | '+t.notes:''}`).join('\n'):'No trades logged.';
+  const grades=tradeLog.map(t=>t.grade);
+  const gc={A:grades.filter(g=>g==='A').length,B:grades.filter(g=>g==='B').length,C:grades.filter(g=>g==='C').length};
+  const mc=moodScore?`Mood at open: ${moodScore}/5 (${moodLabel})`:null;
+  const prompt=`Generate an end-of-day summary for ${userName}'s session.\n\nTRADE LOG:\n${logText}\nGRADE TALLY: ${gc.A}A / ${gc.B}B / ${gc.C}C\nTOTAL P&L: $${totalPnl>=0?'+':''}${totalPnl}${mc?'\n'+mc:''}\n\nUsing the full conversation as context, provide exactly:\n1. PROCESS SUMMARY — 2-3 sentences on execution quality, honest assessment\n2. PATTERN FLAGS — specific behavioral patterns observed today, be direct\n3. KEY TAKEAWAY — one sentence only\n4. TOMORROW'S FOCUS — one specific actionable improvement\n\nWrite as his trading partner. Direct and honest. No cheerleading.`;
+  try{
+    eodSummaryText=await callAPI([...conversationHistory,{role:'user',content:prompt}]);
+    document.getElementById('eod-content').innerHTML=`
+      <div><div class="modal-sec">Trade Log</div><div class="modal-txt">${logText}</div></div>
+      <div><div class="modal-sec">Grades & P&L</div><div class="modal-txt" style="display:flex;gap:20px;font-weight:500;align-items:center"><span class="ga">${gc.A}×A</span><span class="gb">${gc.B}×B</span><span class="gc">${gc.C}×C</span><span style="color:${totalPnl>=0?'var(--green)':'var(--red)'};margin-left:8px">$${totalPnl>=0?'+':''}${totalPnl}</span></div></div>
+      <div><div class="modal-sec">Partner Assessment</div><div class="modal-txt">${eodSummaryText}</div></div>`;
+  }catch(err){document.getElementById('eod-content').innerHTML=`<div style="color:var(--red);font-size:13px">Error: ${err.message}</div>`;}
+}
+
+function downloadEOD(){
+  const date=new Date().toLocaleDateString('en-US',{year:'numeric',month:'2-digit',day:'2-digit'}).replace(/\//g,'-');
+  const logText=tradeLog.map(t=>`${t.time} | ${t.ticker}${t.details?' | '+t.details:''} | Grade: ${t.grade}${t.notes?' | '+t.notes:''}`).join('\n');
+  const skip=['Auto check-in','It is ','ping',`${userName} logged`,'running a pre-trade','wants a quick lookup'];
+  const transcript=conversationHistory.filter(m=>!skip.some(p=>m.content.startsWith(p))).map(m=>`[${m.role.toUpperCase()}]\n${m.content}`).join('\n\n---\n\n');
+  const content=`Arkad — Session Report\nDate: ${date}\nTrader: ${userName}\nMood: ${moodScore?`${moodScore}/5 (${moodLabel})`:'Not recorded'}\nTotal P&L: $${totalPnl>=0?'+':''}${totalPnl}\n\n${'='.repeat(40)}\nTRADE LOG\n${'='.repeat(40)}\n${logText||'No trades logged.'}\n\n${'='.repeat(40)}\nEOD SUMMARY\n${'='.repeat(40)}\n${eodSummaryText||'Not generated.'}\n\n${'='.repeat(40)}\nFULL TRANSCRIPT\n${'='.repeat(40)}\n${transcript}`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:'text/plain'}));a.download=`edge-session-${date}.txt`;a.click();
+}
+
+function closeOverlay(id){document.getElementById(id).classList.remove('open');}
+
+document.addEventListener('keydown',e=>{
+  if(document.activeElement===document.getElementById('msg-input')&&e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}
+  if(document.activeElement===document.getElementById('lookup-ticker')&&e.key==='Enter'){doLookup();}
+});
+</script>
+</body>
+</html>
